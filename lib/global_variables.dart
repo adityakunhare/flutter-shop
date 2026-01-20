@@ -3,7 +3,7 @@ final products = [
     'id': 1,
     'title': 'Nike Air Max 270',
     'imageURL':
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWPJFbPY24_QMEBZwHwjORfHDppEkF9g-Bt8XcV0pLCRnHCXmhY1UULmqabVgH3Cjpgog&usqp=CAU',
+        'assets/images/pngegg.png',
     'price': 150,
     'old_price': 200,
     'is_favorite': false,
@@ -17,7 +17,7 @@ final products = [
     'id': 2,
     'title': 'Adidas Ultraboost',
     'imageURL':
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWPJFbPY24_QMEBZwHwjORfHDppEkF9g-Bt8XcV0pLCRnHCXmhY1UULmqabVgH3Cjpgog&usqp=CAU',
+        'assets/images/pngegg1.png',
     'price': 180,
     'old_price': 220,
     'is_favorite': true,
@@ -30,7 +30,7 @@ final products = [
   {
     'id': 3,
     'title': 'Puma RS-X',
-    'imageURL': 'https://i.ebayimg.com/images/g/51IAAeSwTyFop8Fy/s-l400.jpg',
+    'imageURL': 'assets/images/pngegg3.png',
     'price': 130,
     'old_price': 170,
     'is_favorite': false,
@@ -43,8 +43,7 @@ final products = [
   {
     'id': 4,
     'title': 'Reebok Classic',
-    'imageURL':
-        'https://brand.assets.adidas.com/image/upload/f_auto,q_auto:best,fl_lossy/PAC_ORIGINALS_SHOES_PLP_IWP_TILE_CAMPUS_5e49714426.jpg',
+    'imageURL': 'assets/images/pngegg4.png',
     'price': 120,
     'old_price': 160,
     'is_favorite': true,
@@ -54,4 +53,15 @@ final products = [
     'sizes': [7, 8, 9, 10, 11],
     'colors': [0xFF000000, 0xFFFFFFFF, 0xFFFF0000],
   },
+];
+
+final cart = [
+  {
+    'id': 2,
+    'title': 'Jordan shoes',
+    'price': 490,
+    'imageURL': 'assets/images/pngegg5.png',
+    'company': 'Nike',
+    'size': 9,
+  }
 ];

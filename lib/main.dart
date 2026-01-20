@@ -15,14 +15,23 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Lato',
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.yellowAccent.shade400,
+          primary: Colors.yellowAccent.shade700,
+        ),
+        appBarTheme: AppBarTheme(
+          titleTextStyle: TextStyle(fontSize: 20, color: Colors.black),
         ),
         inputDecorationTheme: InputDecorationTheme(
           hintStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          prefixIconColor: Colors.grey.shade600
+          prefixIconColor: Colors.grey.shade600,
+        ),
+        textTheme: const TextTheme(
+          titleMedium: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          bodySmall: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),
       title: 'Shopping app',
       home: const HomePage(),
+      // home: ProductDetailsPage(product: products[0]),
     );
   }
 }
