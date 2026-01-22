@@ -63,5 +63,13 @@ final cart = [
     'imageURL': 'assets/images/pngegg5.png',
     'company': 'Nike',
     'size': 9,
+  },
+  {
+    'id': 3,
+    'title': 'Addidas shoes',
+    'price': 420,
+    'imageURL': 'assets/images/pngegg5.png',
+    'company': 'Nike',
+    'size': 9,
   }
 ];

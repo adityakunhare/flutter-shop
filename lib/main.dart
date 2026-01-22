@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/cart_provider.dart';
 import 'package:shop_app/home_page.dart';
 
 void main() {
@@ -10,28 +12,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        fontFamily: 'Lato',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.yellowAccent.shade400,
-          primary: Colors.yellowAccent.shade700,
+    return ChangeNotifierProvider(
+      create: (context) => CartProvider(),
+      child: MaterialApp(
+        theme: ThemeData(
+          fontFamily: 'Lato',
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.yellowAccent.shade400,
+            primary: Colors.yellowAccent.shade700,
+          ),
+          appBarTheme: AppBarTheme(
+            titleTextStyle: TextStyle(fontSize: 20, color: Colors.black),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            hintStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            prefixIconColor: Colors.grey.shade600,
+          ),
+          textTheme: const TextTheme(
+            titleMedium: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            bodySmall: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ),
-        appBarTheme: AppBarTheme(
-          titleTextStyle: TextStyle(fontSize: 20, color: Colors.black),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          hintStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          prefixIconColor: Colors.grey.shade600,
-        ),
-        textTheme: const TextTheme(
-          titleMedium: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          bodySmall: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
+        title: 'Shopping app',
+        home: const HomePage(),
+        // home: ProductDetailsPage(product: products[0]),
       ),
-      title: 'Shopping app',
-      home: const HomePage(),
-      // home: ProductDetailsPage(product: products[0]),
     );
   }
 }
