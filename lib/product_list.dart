@@ -59,7 +59,7 @@ class _ProductListState extends State<ProductList> {
             ],
           ),
           SizedBox(
-            height: 118,
+            height: 80,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: filters.length,
@@ -80,7 +80,7 @@ class _ProductListState extends State<ProductList> {
                       backgroundColor: selectedFilter == filter
                           ? Theme.of(context).colorScheme.primaryContainer
                           : Colors.grey.shade100,
-                      labelStyle: TextStyle(fontSize: 14),
+                      labelStyle: TextStyle(fontSize: 16),
                       label: Text(filter),
                       padding: EdgeInsets.all(6),
                     ),
