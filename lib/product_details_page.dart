@@ -12,17 +12,19 @@ class ProductDetailsPage extends StatefulWidget {
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
   int selectedSize = 0;
-
   void onTap() {
     if (selectedSize != 0) {
-      Provider.of<CartProvider>(context, listen: false).addProduct({
-        'id': widget.product['id']!,
-        'title': widget.product['title']!,
-        'price': widget.product['price']!,
-        'imageURL': widget.product['imageURL']!,
-        'company': widget.product['company']!,
+      context.read<CartProvider>().addProduct({
+        'id': widget.product['id'],
+        'title': widget.product['title'],
+        'price': widget.product['price'],
+        'company': widget.product['company'],
+        'imageURL': widget.product['imageURL'],
         'size': (widget.product['sizes'] as List<int>)[selectedSize],
       });
+      ScaffoldMessenger.of( context).showSnackBar(
+        const SnackBar(content: Text('Product added to cart')),
+      );
     } else {
       ScaffoldMessenger.of(
         context,
