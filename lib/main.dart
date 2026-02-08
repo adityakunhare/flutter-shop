@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
         ),
         title: 'Shopping app',
         home: const HomePage(),
+        debugShowCheckedModeBanner: false,
       ),
     );
   }

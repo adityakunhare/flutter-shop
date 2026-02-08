@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/models/product_detail.dart';
 import 'package:shop_app/providers/cart_provider.dart';
+import 'package:shop_app/services/product_service.dart';
 
 class ProductDetailsPage extends StatefulWidget {
-  final Map<String, Object> product;
-  const ProductDetailsPage({super.key, required this.product});
+  final int productId;
+  const ProductDetailsPage({super.key, required this.productId});
 
   @override
   State<ProductDetailsPage> createState() => _ProductDetailsPageState();
@@ -12,23 +14,61 @@ class ProductDetailsPage extends StatefulWidget {
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
   int selectedSize = 0;
+  Product product = Product(
+    data: Data(
+      type: '',
+      id: 0,
+      attributes: Attributes(
+        title: '',
+        imageUrl: '',
+        price: 0,
+        sizes: [],
+        colors: [],
+        category: '',
+        brand: '',
+      ),
+    ),
+  );
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProductDetail(widget.productId);
+  }
+
+  Future<void> _loadProductDetail(productId) async {
+    try {
+      final response = await ProductService().productDetail(productId);
+      setState(() {
+        product = response;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
   void onTap() {
     if (selectedSize != 0) {
       context.read<CartProvider>().addProduct({
-        'id': widget.product['id'],
-        'title': widget.product['title'],
-        'price': widget.product['price'],
-        'company': widget.product['company'],
-        'imageURL': widget.product['imageURL'],
-        'size': (widget.product['sizes'] as List<int>)[selectedSize],
+        'id': product.data.id,
+        'title': product.data.attributes.title,
+        'price': product.data.attributes.price,
+        'company': product.data.attributes.brand,
+        'imageURL': product.data.attributes.imageUrl,
       });
-      ScaffoldMessenger.of( context).showSnackBar(
-        const SnackBar(content: Text('Product added to cart')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Product added to cart')));
     } else {
-      ScaffoldMessenger.of( context,).showSnackBar(
-        const SnackBar(content: Text('Please select a size'))
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a size')));
     }
   }
 
@@ -39,13 +79,13 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       body: Column(
         children: [
           Text(
-            widget.product['title'] as String,
+            product.data.attributes.title,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const Spacer(),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Image.asset(widget.product['imageURL'] as String),
+            child: Image.network(product.data.attributes.imageUrl),
           ),
           const Spacer(flex: 2),
           Container(
@@ -61,7 +101,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '\$${widget.product['price']}',
+                  '\$${product.data.attributes.price}',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 10),
@@ -69,10 +109,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   height: 50,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: (widget.product['sizes'] as List<int>).length,
+                    itemCount: product.data.attributes.sizes.length,
                     itemBuilder: (context, index) {
-                      final size =
-                          (widget.product['sizes'] as List<int>)[index];
+                      final size = (product.data.attributes.sizes)[index];
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: GestureDetector(

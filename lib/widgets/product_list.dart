@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/models/product.dart';
+import 'package:shop_app/services/product_service.dart';
 import 'package:shop_app/widgets/product_card.dart';
 import 'package:shop_app/pages/product_details_page.dart';
-import '../global_variables.dart';
+// import '../global_variables.dart';
 
 class ProductList extends StatefulWidget {
   const ProductList({super.key});
@@ -20,12 +22,34 @@ class _ProductListState extends State<ProductList> {
     'Bata',
   ];
 
+  List<SingleProduct> products = [];
+  bool isLoading = true;
+  String? errorMessage;
+
+  final ProductService productService = ProductService();
+
   late String selectedFilter;
 
   @override
   void initState() {
     super.initState();
     selectedFilter = filters[0];
+    _loadProducts(null);
+  }
+
+  Future<void> _loadProducts(String? cursor) async {
+    try {
+      final response = await productService.products(cursor);
+      setState(() {
+        products = response.data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -92,50 +116,62 @@ class _ProductListState extends State<ProductList> {
             ),
           ),
           Expanded(
-            child: size.width > 650 ? GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.8,
-              ),
-              itemBuilder: (context, index){
-                final product = products[index];
-                final title = product['title'] as String;
-                final price = product['price'] as int;
-                final image = product['imageURL'] as String;
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return ProductDetailsPage(product: product);
+            // Can use LayoutBuilder(widget) as well if you want parent height
+            child: size.width > 650
+                ? GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 1.8,
+                        ),
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      final title = product.attributes.title;
+                      final price = product.attributes.price;
+                      final image = product.attributes.imageUrl;
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ProductDetailsPage(productId: product.id);
+                              },
+                            ),
+                          );
                         },
-                      ),
-                    );
-                  },
-                  child: ProductCard(title: title, price: price, image: image),
-                );
-              },
-            ): ListView.builder(
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final product = products[index];
-                final title = product['title'] as String;
-                final price = product['price'] as int;
-                final image = product['imageURL'] as String;
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return ProductDetailsPage(product: product);
+                        child: ProductCard(
+                          title: title,
+                          price: price,
+                          image: image,
+                        ),
+                      );
+                    },
+                  )
+                : ListView.builder(
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      final title = product.attributes.title;
+                      final price = product.attributes.price;
+                      final image = product.attributes.imageUrl;
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ProductDetailsPage(productId: product.id);
+                              },
+                            ),
+                          );
                         },
-                      ),
-                    );
-                  },
-                  child: ProductCard(title: title, price: price, image: image),
-                );
-              },
-            ),
+                        child: ProductCard(
+                          title: title,
+                          price: price,
+                          image: image,
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),

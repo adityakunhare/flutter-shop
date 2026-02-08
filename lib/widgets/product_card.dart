@@ -28,7 +28,8 @@ class ProductCard extends StatelessWidget {
           const SizedBox(height: 5),
           Text('\$$price', style: Theme.of(context).textTheme.bodySmall),
           // for assets images
-          Center(child: Image.asset(image, height: 300)),
+          // Center(child: Image.asset(image, height: 300)),
+          Center(child: Image.network(image, height: 300)),
           // For network images (image url)
           // Image.network(image),
         ],
