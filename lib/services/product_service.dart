@@ -5,10 +5,8 @@ import 'package:shop_app/models/product_detail.dart';
 
 class ProductService {
   Future<Products> products(String? cursor) async {
-    final uri = Uri.parse('${ApiUrl.baseUrl}/products');
-    if (cursor != null) {
-      uri.replace(queryParameters: {cursor: cursor});
-    }
+    final urlString = '${ApiUrl.baseUrl}/products${cursor != null ? '?cursor=$cursor' : ''}';
+    final uri = Uri.parse(urlString);
     final response = await http.get(uri);
     if (response.statusCode == 200) {
       return productsFromJson(response.body);

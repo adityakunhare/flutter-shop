@@ -3,7 +3,6 @@ import 'package:shop_app/models/product.dart';
 import 'package:shop_app/services/product_service.dart';
 import 'package:shop_app/widgets/product_card.dart';
 import 'package:shop_app/pages/product_details_page.dart';
-// import '../global_variables.dart';
 
 class ProductList extends StatefulWidget {
   const ProductList({super.key});
@@ -13,6 +12,7 @@ class ProductList extends StatefulWidget {
 }
 
 class _ProductListState extends State<ProductList> {
+  // need api for filters as well.
   final List<String> filters = const [
     'All',
     'Addidas',
@@ -23,8 +23,13 @@ class _ProductListState extends State<ProductList> {
   ];
 
   List<SingleProduct> products = [];
-  bool isLoading = true;
+  late Meta meta;
+  bool isLoading = false;
   String? errorMessage;
+  String? _nextCursor;
+
+  final ScrollController _scrollController = ScrollController();
+  bool hasMore = true;
 
   final ProductService productService = ProductService();
 
@@ -35,13 +40,46 @@ class _ProductListState extends State<ProductList> {
     super.initState();
     selectedFilter = filters[0];
     _loadProducts(null);
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        if (hasMore && !isLoading) {
+          _loadProducts(_nextCursor);
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProducts(String? cursor) async {
+    if (isLoading) {
+      return;
+    }
+    setState(() {
+      isLoading = true;
+      if (cursor == null) {
+        errorMessage = null;
+      }
+    });
     try {
       final response = await productService.products(cursor);
       setState(() {
-        products = response.data;
+        if (cursor == null) {
+          products = response.data;
+        } else {
+          products = [...products, ...response.data];
+        }
+        meta = response.meta;
+        _nextCursor = response.meta.nextCursor.isNotEmpty
+            ? response.meta.nextCursor
+            : null;
+        hasMore = _nextCursor != null;
         isLoading = false;
       });
     } catch (e) {
@@ -54,8 +92,6 @@ class _ProductListState extends State<ProductList> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return SafeArea(
       child: Column(
         children: [
@@ -117,61 +153,34 @@ class _ProductListState extends State<ProductList> {
           ),
           Expanded(
             // Can use LayoutBuilder(widget) as well if you want parent height
-            child: size.width > 650
-                ? GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 1.8,
-                        ),
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      final title = product.attributes.title;
-                      final price = product.attributes.price;
-                      final image = product.attributes.imageUrl;
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return ProductDetailsPage(productId: product.id);
-                              },
-                            ),
-                          );
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: products.length + (isLoading ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index >= products.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                final product = products[index];
+                final title = product.attributes.title;
+                final price = product.attributes.price;
+                final image = product.attributes.imageUrl;
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return ProductDetailsPage(productId: product.id);
                         },
-                        child: ProductCard(
-                          title: title,
-                          price: price,
-                          image: image,
-                        ),
-                      );
-                    },
-                  )
-                : ListView.builder(
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      final title = product.attributes.title;
-                      final price = product.attributes.price;
-                      final image = product.attributes.imageUrl;
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return ProductDetailsPage(productId: product.id);
-                              },
-                            ),
-                          );
-                        },
-                        child: ProductCard(
-                          title: title,
-                          price: price,
-                          image: image,
-                        ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
+                  child: ProductCard(title: title, price: price, image: image),
+                );
+              },
+            ),
           ),
         ],
       ),
