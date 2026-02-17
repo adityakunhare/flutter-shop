@@ -14,21 +14,7 @@ class ProductDetailsPage extends StatefulWidget {
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
   int selectedSize = 0;
-  Product product = Product(
-    data: Data(
-      type: '',
-      id: 0,
-      attributes: Attributes(
-        title: '',
-        imageUrl: '',
-        price: 0,
-        sizes: [],
-        colors: [],
-        category: '',
-        brand: '',
-      ),
-    ),
-  );
+  late Product product;
   bool isLoading = true;
   String? errorMessage;
 
@@ -84,6 +70,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   product.data.attributes.title,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
+                Text(product.data.attributes.brand),
                 const Spacer(),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -124,6 +111,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                 onTap: () {
                                   setState(() {
                                     selectedSize = index;
+                                    isLoading = true;
                                   });
                                 },
                                 child: Chip(

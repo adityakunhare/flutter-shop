@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/models/brand_list.dart';
 import 'package:shop_app/models/product.dart';
+import 'package:shop_app/services/brand_service.dart';
 import 'package:shop_app/services/product_service.dart';
 import 'package:shop_app/widgets/product_card.dart';
 import 'package:shop_app/pages/product_details_page.dart';
@@ -12,16 +14,7 @@ class ProductList extends StatefulWidget {
 }
 
 class _ProductListState extends State<ProductList> {
-  // need api for filters as well.
-  final List<String> filters = const [
-    'All',
-    'Addidas',
-    'Nike',
-    'Puma',
-    'Jordan',
-    'Bata',
-  ];
-
+  List<Brand> brands = [];
   List<SingleProduct> products = [];
   late Meta meta;
   bool isLoading = false;
@@ -33,19 +26,20 @@ class _ProductListState extends State<ProductList> {
 
   final ProductService productService = ProductService();
 
-  late String selectedFilter;
+  Brand? selectedFilter;
 
   @override
   void initState() {
     super.initState();
-    selectedFilter = filters[0];
+
+    _loadBrands();
     _loadProducts();
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
         if (hasMore && !isLoading) {
-          _loadProducts(query:{'cursor':'$_nextCursor'});
+          _loadProducts(query: {'cursor': '$_nextCursor'});
         }
       }
     });
@@ -57,18 +51,33 @@ class _ProductListState extends State<ProductList> {
     super.dispose();
   }
 
+  Future<void> _loadBrands() async {
+    if (isLoading) {
+      return;
+    }
+
+    try {
+      final response = await BrandService().brands();
+      setState(() {
+        brands = response.data;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
   Future<void> _loadProducts({Map<String, String>? query}) async {
     if (isLoading) {
       return;
     }
     setState(() {
       isLoading = true;
-      if (query?['cursor'] == null) {
-        errorMessage = null;
-      }
     });
     try {
-      final response = await productService.products(query: {'cursor':query?['cursor'] ?? ''});
+      final response = await productService.products(query:query);
       setState(() {
         if (query?['cursor'] == null) {
           products = response.data;
@@ -120,30 +129,32 @@ class _ProductListState extends State<ProductList> {
               ),
             ],
           ),
+          // Brand filters
           SizedBox(
             height: 80,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: filters.length,
+              itemCount: brands.length,
               itemBuilder: (context, index) {
-                final filter = filters[index];
+                final filter = brands[index];
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6.0),
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
                         selectedFilter = filter;
+                        _loadProducts(query: {'brand': '${filter.id}'});
                       });
                     },
                     child: Chip(
                       shape: StadiumBorder(
                         side: BorderSide(color: Colors.grey.shade100),
                       ),
-                      backgroundColor: selectedFilter == filter
-                          ? Theme.of(context).colorScheme.primaryContainer
+                      backgroundColor: selectedFilter == filter 
+                          ? Theme.of(context).colorScheme.primary
                           : Colors.grey.shade100,
                       labelStyle: TextStyle(fontSize: 16),
-                      label: Text(filter),
+                      label: Text(filter.attributes.title),
                       padding: EdgeInsets.all(6),
                     ),
                   ),
@@ -151,6 +162,7 @@ class _ProductListState extends State<ProductList> {
               },
             ),
           ),
+
           Expanded(
             // Can use LayoutBuilder(widget) as well if you want parent height
             child: ListView.builder(
