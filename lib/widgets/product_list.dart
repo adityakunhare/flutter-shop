@@ -39,13 +39,13 @@ class _ProductListState extends State<ProductList> {
   void initState() {
     super.initState();
     selectedFilter = filters[0];
-    _loadProducts(null);
+    _loadProducts();
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
         if (hasMore && !isLoading) {
-          _loadProducts(_nextCursor);
+          _loadProducts(query:{'cursor':'$_nextCursor'});
         }
       }
     });
@@ -57,20 +57,20 @@ class _ProductListState extends State<ProductList> {
     super.dispose();
   }
 
-  Future<void> _loadProducts(String? cursor) async {
+  Future<void> _loadProducts({Map<String, String>? query}) async {
     if (isLoading) {
       return;
     }
     setState(() {
       isLoading = true;
-      if (cursor == null) {
+      if (query?['cursor'] == null) {
         errorMessage = null;
       }
     });
     try {
-      final response = await productService.products(cursor);
+      final response = await productService.products(query: {'cursor':query?['cursor'] ?? ''});
       setState(() {
-        if (cursor == null) {
+        if (query?['cursor'] == null) {
           products = response.data;
         } else {
           products = [...products, ...response.data];
