@@ -15,18 +15,19 @@ class ProductList extends StatefulWidget {
 
 class _ProductListState extends State<ProductList> {
   List<Brand> brands = [];
+  Brand? selectedFilter;
   List<SingleProduct> products = [];
   late Meta meta;
   bool isLoading = false;
+  bool hasMore = true;
   String? errorMessage;
   String? _nextCursor;
+  // String? _queryString;
+  final Map <String, String> _currentQueries = {};
 
   final ScrollController _scrollController = ScrollController();
-  bool hasMore = true;
-
   final ProductService productService = ProductService();
 
-  Brand? selectedFilter;
 
   @override
   void initState() {
@@ -36,10 +37,10 @@ class _ProductListState extends State<ProductList> {
     _loadProducts();
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200
+      ) {
         if (hasMore && !isLoading) {
-          _loadProducts(query: {'cursor': '$_nextCursor'});
+          _loadProducts(query: _currentQueries);
         }
       }
     });
@@ -79,7 +80,7 @@ class _ProductListState extends State<ProductList> {
     try {
       final response = await productService.products(query:query);
       setState(() {
-        if (query?['cursor'] == null) {
+        if (query?['cursor'] == null || query?['brand'] == null) {
           products = response.data;
         } else {
           products = [...products, ...response.data];
@@ -89,6 +90,10 @@ class _ProductListState extends State<ProductList> {
             ? response.meta.nextCursor
             : null;
         hasMore = _nextCursor != null;
+        if(hasMore){
+          // _currentQueries.addAll({ 'cursor': _nextCursor! });
+          _currentQueries['cursor'] = _nextCursor!;
+        }
         isLoading = false;
       });
     } catch (e) {
@@ -143,7 +148,9 @@ class _ProductListState extends State<ProductList> {
                     onTap: () {
                       setState(() {
                         selectedFilter = filter;
-                        _loadProducts(query: {'brand': '${filter.id}'});
+                        // _currentQueries.addAll({'brand': '${filter.id}'});
+                        _currentQueries['brand'] = '${filter.id}';
+                        _loadProducts(query: _currentQueries);
                       });
                     },
                     child: Chip(
