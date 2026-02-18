@@ -148,8 +148,9 @@ class _ProductListState extends State<ProductList> {
                     onTap: () {
                       setState(() {
                         selectedFilter = filter;
-                        // _currentQueries.addAll({'brand': '${filter.id}'});
+                        _currentQueries.clear();
                         _currentQueries['brand'] = '${filter.id}';
+                        _nextCursor = null;
                         _loadProducts(query: _currentQueries);
                       });
                     },
